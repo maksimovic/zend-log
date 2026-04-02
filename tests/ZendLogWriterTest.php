@@ -164,4 +164,94 @@ class ZendLogWriterTest extends TestCase
         $log->info('resource test');
         $this->assertInstanceOf(Zend_Log::class, $log);
     }
+
+    public function testStreamWriterShutdownClosesStream(): void
+    {
+        $file = tempnam(sys_get_temp_dir(), 'zend_log_shut_');
+        try {
+            $writer = new Zend_Log_Writer_Stream($file);
+            $writer->shutdown();
+            // after shutdown, writing should fail
+            $this->expectException(Zend_Log_Exception::class);
+            $writer->write([
+                'timestamp' => date('c'),
+                'message' => 'after shutdown',
+                'priority' => 6,
+                'priorityName' => 'INFO',
+            ]);
+        } finally {
+            @unlink($file);
+        }
+    }
+
+    public function testSyslogWriterFactory(): void
+    {
+        $writer = Zend_Log_Writer_Syslog::factory(['application' => 'test']);
+        $this->assertInstanceOf(Zend_Log_Writer_Syslog::class, $writer);
+    }
+
+    public function testSyslogWriterWithFacility(): void
+    {
+        $writer = new Zend_Log_Writer_Syslog([
+            'application' => 'test',
+            'facility' => LOG_LOCAL0,
+        ]);
+        $log = new Zend_Log($writer);
+        $log->info('facility test');
+        $this->assertInstanceOf(Zend_Log::class, $log);
+    }
+
+    public function testSyslogWriterSetApplicationName(): void
+    {
+        $writer = new Zend_Log_Writer_Syslog();
+        $result = $writer->setApplicationName('myapp');
+        $this->assertSame($writer, $result);
+    }
+
+    public function testSyslogWriterSetFacilityThrowsOnInvalid(): void
+    {
+        $writer = new Zend_Log_Writer_Syslog();
+        $this->expectException(Zend_Log_Exception::class);
+        $writer->setFacility(999999);
+    }
+
+    public function testSyslogWriterAllPriorities(): void
+    {
+        $writer = new Zend_Log_Writer_Syslog(['application' => 'test']);
+        $log = new Zend_Log($writer);
+        $log->emerg('emerg');
+        $log->alert('alert');
+        $log->crit('crit');
+        $log->err('err');
+        $log->warn('warn');
+        $log->notice('notice');
+        $log->info('info');
+        $log->debug('debug');
+        $this->assertInstanceOf(Zend_Log::class, $log);
+    }
+
+    public function testSyslogWriterWithCustomPriority(): void
+    {
+        $writer = new Zend_Log_Writer_Syslog(['application' => 'test']);
+        $log = new Zend_Log($writer);
+        $log->addPriority('CUSTOM', 8);
+        $log->log('custom priority goes to default syslog priority', 8);
+        $this->assertInstanceOf(Zend_Log::class, $log);
+    }
+
+    public function testSyslogWriterWithFormatter(): void
+    {
+        $writer = new Zend_Log_Writer_Syslog(['application' => 'test']);
+        $writer->setFormatter(new Zend_Log_Formatter_Simple('%message%'));
+        $log = new Zend_Log($writer);
+        $log->info('formatted syslog');
+        $this->assertInstanceOf(Zend_Log::class, $log);
+    }
+
+    public function testSyslogWriterShutdown(): void
+    {
+        $writer = new Zend_Log_Writer_Syslog(['application' => 'test']);
+        $writer->shutdown();
+        $this->assertInstanceOf(Zend_Log_Writer_Syslog::class, $writer);
+    }
 }
