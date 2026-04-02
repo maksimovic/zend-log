@@ -1,13 +1,17 @@
 {
-    "name": "zf1s/zend-log",
+    "name": "maksimovic/zend-log",
     "description": "Zend Framework 1 Log package",
     "keywords": ["framework", "zf1", "zend", "log"],
     "homepage": "http://framework.zend.com/",
     "license": "BSD-3-Clause",
     "require": {
-        "php": ">=5.3.3",
+        "php": ">=8.1",
         "ext-reflection": "*",
-        "zf1s/zend-exception": "^1.15.5"
+        "maksimovic/zend-exception": "^2.0.1"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^10.5",
+        "phpstan/phpstan": "^2.1"
     },
     "autoload": {
         "psr-0": {
@@ -15,15 +19,20 @@
         }
     },
     "suggest": {
-        "ext-dom": "Used in special situations or with special adapters (Zend_Log_Formatter_Xml)",
-        "zf1s/zend-wildfire": "Used in special situations or with special adapters"
+        "ext-dom": "Required for Zend_Log_Formatter_Xml"
     },
     "replace": {
-        "zf1/zend-log": "^1.12"
+        "zf1/zend-log": "^1.12",
+        "zf1s/zend-log": "^1.12"
+    },
+    "scripts": {
+        "test": "phpunit",
+        "test:coverage": "phpunit --coverage-text",
+        "phpstan": "phpstan analyse --memory-limit=256M"
     },
     "extra": {
         "branch-alias": {
-            "dev-master": "1.x-dev"
+            "dev-master": "2.x-dev"
         }
     }
 }

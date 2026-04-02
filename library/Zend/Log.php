@@ -116,7 +116,7 @@ class Zend_Log
      *
      * @param Zend_Log_Writer_Abstract|null  $writer  default writer
      */
-    public function __construct(Zend_Log_Writer_Abstract $writer = null)
+    public function __construct(?Zend_Log_Writer_Abstract $writer = null)
     {
         $r = new ReflectionClass($this);
         $this->_priorities = array_flip($r->getConstants());
@@ -594,14 +594,12 @@ class Zend_Log
             E_USER_ERROR        => Zend_Log::ERR,
             E_CORE_ERROR        => Zend_Log::ERR,
             E_RECOVERABLE_ERROR => Zend_Log::ERR,
-            E_STRICT            => Zend_Log::DEBUG,
+            E_DEPRECATED        => Zend_Log::DEBUG,
+            E_USER_DEPRECATED   => Zend_Log::DEBUG,
         );
-        // PHP 5.3.0+
-        if (defined('E_DEPRECATED')) {
-            $this->_errorHandlerMap['E_DEPRECATED'] = Zend_Log::DEBUG;
-        }
-        if (defined('E_USER_DEPRECATED')) {
-            $this->_errorHandlerMap['E_USER_DEPRECATED'] = Zend_Log::DEBUG;
+        // E_STRICT is deprecated since PHP 8.4
+        if (PHP_VERSION_ID < 80400) {
+            $this->_errorHandlerMap[E_STRICT] = Zend_Log::DEBUG;
         }
 
         $this->_registeredErrorHandler = true;

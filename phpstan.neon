@@ -1,0 +1,11 @@
+parameters:
+    level: 1
+    paths:
+        - library
+    ignoreErrors:
+        - message: '#Zend_Config#'
+        - message: '#Zend_Loader#'
+        - message: '#Zend_Mail#'
+        - message: '#Zend_Layout#'
+        - message: '#Zend_Wildfire#'
+        - message: '#zend_monitor_custom_event#'
