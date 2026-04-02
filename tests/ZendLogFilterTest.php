@@ -87,4 +87,28 @@ class ZendLogFilterTest extends TestCase
         $this->expectException(Zend_Log_Exception::class);
         $log->addFilter(new stdClass());
     }
+
+    public function testPriorityFilterFactory(): void
+    {
+        $filter = Zend_Log_Filter_Priority::factory(['priority' => 4]);
+        $this->assertInstanceOf(Zend_Log_Filter_Priority::class, $filter);
+    }
+
+    public function testPriorityFilterFactoryWithConstant(): void
+    {
+        $filter = Zend_Log_Filter_Priority::factory(['priority' => 'Zend_Log::WARN']);
+        $this->assertInstanceOf(Zend_Log_Filter_Priority::class, $filter);
+    }
+
+    public function testMessageFilterFactory(): void
+    {
+        $filter = Zend_Log_Filter_Message::factory(['regexp' => '/test/']);
+        $this->assertInstanceOf(Zend_Log_Filter_Message::class, $filter);
+    }
+
+    public function testSuppressFilterFactory(): void
+    {
+        $filter = Zend_Log_Filter_Suppress::factory([]);
+        $this->assertInstanceOf(Zend_Log_Filter_Suppress::class, $filter);
+    }
 }

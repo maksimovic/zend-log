@@ -101,4 +101,67 @@ class ZendLogWriterTest extends TestCase
         $log->info('syslog test');
         $this->assertInstanceOf(Zend_Log::class, $log);
     }
+
+    public function testWriterAddFilterByInt(): void
+    {
+        $mock = new Zend_Log_Writer_Mock();
+        $mock->addFilter(Zend_Log::ERR);
+        $log = new Zend_Log($mock);
+        $log->info('filtered');
+        $log->err('not filtered');
+        $this->assertCount(1, $mock->events);
+    }
+
+    public function testWriterAddFilterThrowsOnInvalid(): void
+    {
+        $mock = new Zend_Log_Writer_Mock();
+        $this->expectException(Zend_Log_Exception::class);
+        $mock->addFilter('invalid');
+    }
+
+    public function testStreamWriterFactory(): void
+    {
+        $file = tempnam(sys_get_temp_dir(), 'zend_log_factory_');
+        try {
+            $writer = Zend_Log_Writer_Stream::factory(['stream' => $file]);
+            $this->assertInstanceOf(Zend_Log_Writer_Stream::class, $writer);
+        } finally {
+            @unlink($file);
+        }
+    }
+
+    public function testMockWriterFactory(): void
+    {
+        $writer = Zend_Log_Writer_Mock::factory([]);
+        $this->assertInstanceOf(Zend_Log_Writer_Mock::class, $writer);
+    }
+
+    public function testNullWriterFactory(): void
+    {
+        $writer = Zend_Log_Writer_Null::factory([]);
+        $this->assertInstanceOf(Zend_Log_Writer_Null::class, $writer);
+    }
+
+    public function testMultipleFiltersOnWriter(): void
+    {
+        $mock = new Zend_Log_Writer_Mock();
+        $mock->addFilter(new Zend_Log_Filter_Priority(Zend_Log::WARN));
+        $mock->addFilter(new Zend_Log_Filter_Message('/critical/'));
+        $log = new Zend_Log($mock);
+        $log->warn('just a warning');
+        $log->warn('critical warning');
+        $log->info('critical info');
+        // only "critical warning" passes both filters
+        $this->assertCount(1, $mock->events);
+        $this->assertSame('critical warning', $mock->events[0]['message']);
+    }
+
+    public function testStreamWriterWithResource(): void
+    {
+        $stream = fopen('php://memory', 'a');
+        $writer = new Zend_Log_Writer_Stream($stream);
+        $log = new Zend_Log($writer);
+        $log->info('resource test');
+        $this->assertInstanceOf(Zend_Log::class, $log);
+    }
 }

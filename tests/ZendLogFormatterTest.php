@@ -68,4 +68,61 @@ class ZendLogFormatterTest extends TestCase
         $this->assertStringContainsString('<logEntry>', $output);
         $this->assertStringContainsString('xml test', $output);
     }
+
+    public function testXmlFormatterCustomRoot(): void
+    {
+        $formatter = new Zend_Log_Formatter_Xml('customRoot');
+        $output = $formatter->format(['message' => 'test']);
+        $this->assertStringContainsString('<customRoot>', $output);
+    }
+
+    public function testXmlFormatterWithElementMap(): void
+    {
+        $formatter = new Zend_Log_Formatter_Xml([
+            'rootElement' => 'entry',
+            'elementMap' => ['msg' => 'message', 'lvl' => 'priority'],
+        ]);
+        $output = $formatter->format([
+            'message' => 'mapped',
+            'priority' => 6,
+        ]);
+        $this->assertStringContainsString('<msg>mapped</msg>', $output);
+        $this->assertStringContainsString('<lvl>6</lvl>', $output);
+    }
+
+    public function testXmlFormatterEncoding(): void
+    {
+        $formatter = new Zend_Log_Formatter_Xml();
+        $this->assertSame('UTF-8', $formatter->getEncoding());
+        $formatter->setEncoding('ISO-8859-1');
+        $this->assertSame('ISO-8859-1', $formatter->getEncoding());
+    }
+
+    public function testXmlFormatterFactory(): void
+    {
+        $formatter = Zend_Log_Formatter_Xml::factory([]);
+        $this->assertInstanceOf(Zend_Log_Formatter_Xml::class, $formatter);
+    }
+
+    public function testSimpleFormatterFactory(): void
+    {
+        $formatter = Zend_Log_Formatter_Simple::factory(['format' => '%message%']);
+        $output = $formatter->format(['message' => 'hello']);
+        $this->assertSame('hello', $output);
+    }
+
+    public function testSimpleFormatterFactoryNull(): void
+    {
+        $formatter = Zend_Log_Formatter_Simple::factory(null);
+        $this->assertInstanceOf(Zend_Log_Formatter_Simple::class, $formatter);
+    }
+
+    public function testXmlFormatterEscapesHtml(): void
+    {
+        $formatter = new Zend_Log_Formatter_Xml();
+        $output = $formatter->format([
+            'message' => '<script>alert("xss")</script>',
+        ]);
+        $this->assertStringNotContainsString('<script>', $output);
+    }
 }
