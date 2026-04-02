@@ -23,7 +23,8 @@
     },
     "replace": {
         "zf1/zend-log": "^1.12",
-        "zf1s/zend-log": "^1.12"
+        "zf1s/zend-log": "^1.12",
+        "zendframework/zend-log": "*"
     },
     "scripts": {
         "test": "phpunit",
